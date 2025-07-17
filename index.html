@@ -2,58 +2,60 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Geovisor Municipio de Quito</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Geovisor Catastral de Quito</title>
   <style>
-    body, html {
-      margin: 0; padding: 0;
+    body {
       font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      color: #333;
     }
     header {
-      background: #004b8d;
+      background-color: #004b87;
       color: white;
-      padding: 1em;
+      padding: 20px;
       text-align: center;
     }
-    #map {
-      width: 100%;
-      height: calc(100vh - 70px);
+    main {
+      padding: 20px;
+      text-align: center;
     }
-    .leaflet-popup-content-wrapper {
-      font-size: 14px;
+    iframe {
+      width: 90%;
+      height: 600px;
+      border: none;
+      margin-top: 20px;
+    }
+    footer {
+      background-color: #004b87;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      position: relative;
+      bottom: 0;
+      width: 100%;
     }
   </style>
 </head>
 <body>
 
-<header>
-  <h1>Geovisor del Municipio de Quito</h1>
-  <p>Visualización de capas geográficas municipales</p>
-</header>
+  <header>
+    <h1>Geovisor Catastral de Quito</h1>
+    <p>Consulta la información catastral del Distrito Metropolitano de Quito</p>
+  </header>
 
-<div id="map"></div>
+  <main>
+    <p>A continuación se muestra el visor geográfico oficial:</p>
+    
+    <!-- Iframe del geovisor catastral de Quito -->
+    <iframe src="https://geoquito.quito.gob.ec/portal/apps/webappviewer/index.html?id=b178f86a1f064f90a2c50f275d9cf219" allowfullscreen></iframe>
+  </main>
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-<script>
-  // Inicializar mapa centrado en Quito
-  const map = L.map('map').setView([-0.22985, -78.52495], 12);
-
-  // Capa base de OpenStreetMap
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap',
-    maxZoom: 19,
-  }).addTo(map);
-
-  // Ejemplo: Punto del Municipio
-  const municipioMarker = L.marker([-0.22985, -78.52495]).addTo(map);
-  municipioMarker.bindPopup("<b>Municipio de Quito</b><br>Sede principal");
-
-  // Aquí puedes integrar más capas, por ejemplo desde Supabase, GeoJSON, etc.
-</script>
+  <footer>
+    &copy; 2025 Municipio del Distrito Metropolitano de Quito
+  </footer>
 
 </body>
 </html>
