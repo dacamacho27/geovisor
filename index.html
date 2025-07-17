@@ -4,13 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Geovisor Catastral de Quito</title>
+
+  <!-- Hoja de estilos Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <style>
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
-      background: #f4f4f4;
-      color: #333;
+      font-family: Arial, sans-serif;
     }
     header {
       background-color: #004b87;
@@ -18,24 +19,15 @@
       padding: 20px;
       text-align: center;
     }
-    main {
-      padding: 20px;
-      text-align: center;
-    }
-    iframe {
-      width: 90%;
-      height: 600px;
-      border: none;
-      margin-top: 20px;
+    #map {
+      height: 80vh;
+      width: 100%;
     }
     footer {
       background-color: #004b87;
       color: white;
       text-align: center;
       padding: 10px;
-      position: relative;
-      bottom: 0;
-      width: 100%;
     }
   </style>
 </head>
@@ -43,19 +35,34 @@
 
   <header>
     <h1>Geovisor Catastral de Quito</h1>
-    <p>Consulta la información catastral del Distrito Metropolitano de Quito</p>
+    <p>Mapa base interactivo con Leaflet y OpenStreetMap</p>
   </header>
 
-  <main>
-    <p>A continuación se muestra el visor geográfico oficial:</p>
-    
-    <!-- Iframe del geovisor catastral de Quito -->
-    <iframe src="https://geoquito.quito.gob.ec/portal/apps/webappviewer/index.html?id=b178f86a1f064f90a2c50f275d9cf219" allowfullscreen></iframe>
-  </main>
+  <!-- Contenedor del mapa -->
+  <div id="map"></div>
 
   <footer>
     &copy; 2025 Municipio del Distrito Metropolitano de Quito
   </footer>
+
+  <!-- Script de Leaflet -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // Inicializar el mapa centrado en Quito
+    var map = L.map('map').setView([-0.22985, -78.52495], 13); // Quito
+
+    // Añadir capa base de OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Marcador opcional en el centro
+    L.marker([-0.22985, -78.52495])
+      .addTo(map)
+      .bindPopup("Centro de Quito")
+      .openPopup();
+  </script>
 
 </body>
 </html>
