@@ -2,66 +2,79 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Geovisor Catastral de Quito</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Hoja de estilos Leaflet -->
+  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-    header {
-      background-color: #004b87;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    #map {
-      height: 80vh;
-      width: 100%;
-    }
-    footer {
-      background-color: #004b87;
-      color: white;
-      text-align: center;
-      padding: 10px;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; }
+    header { background: #004b87; color: white; padding: 1em; text-align: center; }
+    #map { height: 80vh; width: 100%; }
+    footer { background: #004b87; color: white; text-align: center; padding: 10px; }
+    #cargar { margin: 1em auto; display: block; padding: 0.6em 1.2em; font-size: 1em; }
   </style>
 </head>
 <body>
 
   <header>
     <h1>Geovisor Catastral de Quito</h1>
-    <p>Mapa base interactivo con Leaflet y OpenStreetMap</p>
+    <p>Visualización de capas desde Supabase</p>
   </header>
 
-  <!-- Contenedor del mapa -->
+  <button id="cargar">📡 Cargar capa catastral</button>
   <div id="map"></div>
 
   <footer>
     &copy; 2025 Municipio del Distrito Metropolitano de Quito
   </footer>
 
-  <!-- Script de Leaflet -->
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // Inicializar el mapa centrado en Quito
-    var map = L.map('map').setView([-0.22985, -78.52495], 13); // Quito
+    // Configura tus credenciales Supabase
+    const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co'; // cambia esto
+    const API_KEY = 'TU_API_KEY_PUBLICA'; // cambia esto
+    const NOMBRE_TABLA = 'manzanas'; // cambia esto según tu tabla
 
-    // Añadir capa base de OpenStreetMap
+    // Inicializar el mapa
+    const map = L.map('map').setView([-0.22985, -78.52495], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
+      attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Marcador opcional en el centro
-    L.marker([-0.22985, -78.52495])
-      .addTo(map)
-      .bindPopup("Centro de Quito")
-      .openPopup();
+    let layer; // capa actual
+
+    document.getElementById('cargar').onclick = async () => {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${NOMBRE_TABLA}?select=*`, {
+        headers: {
+          'apikey': API_KEY,
+          'Authorization': `Bearer ${API_KEY}`
+        }
+      });
+
+      const data = await res.json();
+
+      const geojson = {
+        type: "FeatureCollection",
+        features: data.map(f => ({
+          type: "Feature",
+          geometry: f.geometry,
+          properties: f
+        }))
+      };
+
+      if (layer) map.removeLayer(layer);
+      layer = L.geoJSON(geojson, {
+        onEachFeature: (feature, layer) => {
+          layer.bindPopup(`<strong>ID:</strong> ${feature.properties.id}<br><strong>Nombre:</strong> ${feature.properties.nombre}`);
+        }
+      }).addTo(map);
+
+      map.fitBounds(layer.getBounds());
+    };
   </script>
 
 </body>
