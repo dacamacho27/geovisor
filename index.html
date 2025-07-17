@@ -1,81 +1,61 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Geovisor Catastral de Quito</title>
+  <meta charset="UTF-8" />
+  <title>Mapa desde Supabase</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; }
-    header { background: #004b87; color: white; padding: 1em; text-align: center; }
-    #map { height: 80vh; width: 100%; }
-    footer { background: #004b87; color: white; text-align: center; padding: 10px; }
-    #cargar { margin: 1em auto; display: block; padding: 0.6em 1.2em; font-size: 1em; }
+    body { margin: 0; font-family: sans-serif; }
+    #map { height: 100vh; width: 100vw; }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>Geovisor Catastral de Quito</h1>
-    <p>Visualización de capas desde Supabase</p>
-  </header>
+<div id="map"></div>
 
-  <button id="cargar">📡 Cargar capa catastral</button>
-  <div id="map"></div>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-  <footer>
-    &copy; 2025 Municipio del Distrito Metropolitano de Quito
-  </footer>
+<script>
+  const SUPABASE_URL = "https://wtuhbbmapoindpuaywxo.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0dWhiYm1hcG9pbmRwdWF5d3hvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3Mjc5NTEsImV4cCI6MjA2ODMwMzk1MX0.1vH0zSrQ5EHHz1p_SS3gtzyDGTBpzHBOjq5ART7Uc8k";
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  // Configurar el mapa
+  const map = L.map('map').setView([-1.8312, -78.1834], 6); // Ecuador centrado
 
-  <script>
-    // Configura tus credenciales Supabase
-    const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co'; // cambia esto
-    const API_KEY = 'TU_API_KEY_PUBLICA'; // cambia esto
-    const NOMBRE_TABLA = 'manzanas'; // cambia esto según tu tabla
+  // Capa base OpenStreetMap
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    maxZoom: 18,
+  }).addTo(map);
 
-    // Inicializar el mapa
-    const map = L.map('map').setView([-0.22985, -78.52495], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+  // Función para cargar datos de Supabase
+  async function cargarDatos() {
+    const tabla = "capas_mapa"; // Reemplaza con el nombre de tu tabla
+    const url = `${SUPABASE_URL}/rest/v1/${tabla}?select=nombre,latitud,longitud`;
 
-    let layer; // capa actual
+    const res = await fetch(url, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`
+      }
+    });
 
-    document.getElementById('cargar').onclick = async () => {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${NOMBRE_TABLA}?select=*`, {
-        headers: {
-          'apikey': API_KEY,
-          'Authorization': `Bearer ${API_KEY}`
-        }
-      });
+    const datos = await res.json();
 
-      const data = await res.json();
+    datos.forEach(punto => {
+      if (punto.latitud && punto.longitud) {
+        L.marker([punto.latitud, punto.longitud])
+          .addTo(map)
+          .bindPopup(`<strong>${punto.nombre}</strong>`);
+      }
+    });
+  }
 
-      const geojson = {
-        type: "FeatureCollection",
-        features: data.map(f => ({
-          type: "Feature",
-          geometry: f.geometry,
-          properties: f
-        }))
-      };
-
-      if (layer) map.removeLayer(layer);
-      layer = L.geoJSON(geojson, {
-        onEachFeature: (feature, layer) => {
-          layer.bindPopup(`<strong>ID:</strong> ${feature.properties.id}<br><strong>Nombre:</strong> ${feature.properties.nombre}`);
-        }
-      }).addTo(map);
-
-      map.fitBounds(layer.getBounds());
-    };
-  </script>
+  cargarDatos();
+</script>
 
 </body>
 </html>
